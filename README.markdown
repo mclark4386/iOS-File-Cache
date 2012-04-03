@@ -48,7 +48,7 @@ You can perform data transforms (such as image resizing, masking, cropping, etc)
     //  This request will store both the unmodified file (if not already saved) and the transformed file
     [[PLACFileCache sharedCache] manageURL:@"http://example.com/longcat.png" withTransform:@"transform-name" delegate:self];
 
-Delegate Methods (PLACImageCacheDelegate protocol):
+Delegate Methods (PLACFileCacheDelegate protocol):
 
     // If any of the manage requests return nil, the cache will call the delegate upon success or failure
     - (void) fileCache:(PLACFileCache *)cache didFailWithError:(NSError *)error
