@@ -19,15 +19,23 @@ Usage
     // You can set the delegate globally or per request
     [PLACFileCache sharedCache].delegate = self;
     
-    // The sharedCache is simply the first cache created.  You can use multiple caches
+The sharedCache is simply the first cache created.  You can use multiple caches:
+
     PLACFileCache * myCache = [[PLACFileCache alloc] initWithDirectory:@"path/to/other/cache" maxSize:20 * kMB];
     [myCache manageURL:@"http://example.com/ceilingcat.png" delegate:self];
     
-    // If the file is not yet available, these methods will return nil
+If the file is not yet available, manageURL: will return nil:
+
     // We set the delegate globally already in this case.
     UIImage * image = [UIImage imageWithData:[[PLACFileCache sharedCache] manageURL:@"http://example.com/nyancat.gif"]];
     
-    // Register a data transform that is run once 
+    if (image) {
+        // do something, otherwise wait for the delegate callback
+    }
+
+You can perform data transforms (such as image resizing, masking, cropping, etc) on the data recieved from the request:
+
+    // Register a data transform that is run once, upon request completion.  This transform will occur before any callbacks.
     [[PLACFileCache sharedCache] registerTransform:@"transform-name" withBlock:(NSData *)^(NSData * data){
     
       NSData * yourModifiedData = [data copy];
@@ -40,6 +48,8 @@ Usage
     //  This request will store both the unmodified file (if not already saved) and the transformed file
     [[PLACFileCache sharedCache] manageURL:@"http://example.com/longcat.png" withTransform:@"transform-name" delegate:self];
 
+Delegate Methods:
+
     // If any of the manage requests return nil, the cache will call the delegate upon success or failure
     - (void) fileCache:(PLACFileCache *)cache didFailWithError:(NSError *)error
     {
@@ -49,10 +59,28 @@ Usage
       // * File access error
     }
     
-    - (void) fileCache:(PLACFileCache *)cache didLoadFile:(NSData *)fileData fromURL:(NSString *)url
+    - (void) fileCache:(PLACFileCache *)cache didLoadFile:(NSData *)fileData withTransform:(NSString *)transform fromURL:(NSString *)url
     {
       // File was successfully loaded (and was not available on the manage request).
     }
 
-[1]: http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used [Cache Algorithms: Least Recently Used]
-[2]: http://developer.apple.com/library/ios/#releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226 [Transitioning to ARC]
+Additional Modules
+------------------
+
+PLACFileCache also provides a PLACManagedImageView, which is a drop in subclass of UIImageView.  It will use the shared cache by default.
+
+    // assuming the UIImageView was set to be an instance of PLACManagedImageView in IB
+    myImageView.imageURL = @"http://example.com/sniperkitty.jpg"
+    
+    // assuming we defined the transform earlier
+    [myOtherImageView setImageURL:@"http://example.com/boxcat.png" withTransform:@"scale-and-rotate"];
+    
+    // use a different cache
+    myOtherImageViewIsATank.fileCache = myOtherFileCache;
+    
+    [myOtherImageViewIsATank setImageURL:@"http://example.com/bznscat.jpg"];
+    
+Since the PLACManagedImageView is a direct subclass of UIImageView, you can do anything you would with a standard UIImageView.
+
+[1]: http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used "Cache Algorithms: Least Recently Used"
+[2]: http://developer.apple.com/library/ios/#releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226 "Transitioning to ARC"
