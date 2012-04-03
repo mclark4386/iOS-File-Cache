@@ -1,11 +1,11 @@
 iOS File Cache (PLACFileCache)
 ==============================
 
-PLACFileCache is an iOS cache that manages storage and caching for arbitrary files (for example, images).  The cache uses a [LRU] [1] caching algorithm to effectively manage the files stored.
+PLACFileCache is an iOS cache that manages storage and caching for arbitrary files (for example, images).  The cache uses a [LRU][1] caching algorithm to effectively manage the files stored.
 
 Requirements
 ------------
-PLACFileCache uses [ARC] [2], and as such, requires a minimum target of iOS 5.  Using the callback transform methods requires blocks support.
+PLACFileCache uses [ARC][2], and as such, requires a minimum target of iOS 5.  Using the callback transform methods requires blocks support.
 
 Adding PLACFileCache to your Project
 ------------------------------------
@@ -54,5 +54,5 @@ Usage
       // File was successfully loaded (and was not available on the manage request).
     }
 
-    [1]: http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used [Cache Algorithms: Least Recently Used]
-    [2]: http://developer.apple.com/library/ios/#releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226 [Transitioning to ARC]
+[1]: http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used [Cache Algorithms: Least Recently Used]
+[2]: http://developer.apple.com/library/ios/#releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226 [Transitioning to ARC]
