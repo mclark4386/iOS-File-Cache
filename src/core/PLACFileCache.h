@@ -54,7 +54,7 @@
 - (NSData *)manageURL:(NSString *)url withTransform:(id)transformIdentifier delegate:(id <PLACFileCacheDelegate>)delegate;
 
 - (void)registerTransform:(id)transformIdentifier withBlock:(NSData * (^) (NSData * data))block;
- 
+
 - (void)clearCache;
 
 - (NSUInteger) currentSize;

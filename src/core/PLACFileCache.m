@@ -35,7 +35,6 @@
 
 - (void) prepareDirectory;
 - (void) prepareCache;
-
 - (void) sweepCache;
 
 - (NSString *) encodeURL:(NSString *)url;
@@ -70,7 +69,7 @@ static PLACFileCache * sharedFileCache;
 {
   [NSException raise:NSInternalInconsistencyException
               format:@"[%@ %@] cannot be called, use [%@ %@] instead.", NSStringFromClass([self class]), NSStringFromSelector(_cmd), NSStringFromClass([self class]), NSStringFromSelector(@selector(initWithDirectory:maxSize:))];
-
+  
   return nil;
 }
 
@@ -85,9 +84,9 @@ static PLACFileCache * sharedFileCache;
     self.active = YES;
     self.transforms = [[NSMutableDictionary alloc] init];
     self.requestQueue = [[NSOperationQueue alloc] init];
-
-    [self.requestQueue setMaxConcurrentOperationCount:1];
-
+    
+    [self.requestQueue setMaxConcurrentOperationCount:2];
+    
     [self prepareDirectory];
     [self prepareCache];
   }
@@ -95,7 +94,7 @@ static PLACFileCache * sharedFileCache;
   if (!sharedFileCache) {
     sharedFileCache = self;
   }
-
+  
   return self;
 }
 
@@ -171,7 +170,7 @@ static PLACFileCache * sharedFileCache;
       [self.cacheInfo setValue:[NSNumber numberWithInt:[responseData length] + [[self.cacheInfo valueForKey:@"currentSize"] intValue]] forKey:@"currentSize"];
       [self sweepCache];
     }];
-  
+    
     returnData = nil;
   }
   return returnData;
@@ -186,19 +185,31 @@ static PLACFileCache * sharedFileCache;
 }
 
 - (void) clearCache {
-  [[NSFileManager defaultManager] removeItemAtPath:self.cacheDirectory error:nil];
+  NSError * error = nil;
+  
+  [[NSFileManager defaultManager] removeItemAtPath:self.cacheDirectory error:&error];
+  
+  if (error) {
+    [delegate fileCache:self didFailWithError:error];
+  }
+  
   [self prepareDirectory];
   [self prepareCache];
 }
 
 - (void) sweepCache {
-  
   while (self.currentSize > self.maxSize) {
     NSString * fileNameToRemove = [[self.cacheInfo objectForKey:@"cachedFiles"] lastObject];
     [[self.cacheInfo objectForKey:@"cachedFiles"] removeLastObject];
     
     NSUInteger length = [[NSData dataWithContentsOfFile:[self.cacheDirectory stringByAppendingPathComponent:fileNameToRemove]] length];
+    NSError * error = nil;
     [[NSFileManager defaultManager] removeItemAtPath:[self.cacheDirectory stringByAppendingPathComponent:fileNameToRemove] error:nil];
+    
+    if (error) {
+      [delegate fileCache:self didFailWithError:error];
+    }
+    
     [self.cacheInfo setValue:[NSNumber numberWithInt:[[self.cacheInfo valueForKey:@"currentSize"] intValue] - length] forKey:@"currentSize"];
   }
   
