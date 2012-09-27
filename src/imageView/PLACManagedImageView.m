@@ -29,19 +29,15 @@
 @end
 
 @implementation PLACManagedImageView
-
-@synthesize imageURL;
-@synthesize defaultImage;
-@synthesize missingImage;
-@synthesize fileCache;
-@synthesize transformIdentifier;
-
 - (id) initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-      self.fileCache = [PLACFileCache sharedCache];
-      self.transformIdentifier = nil;
+      _fileCache = [PLACFileCache sharedCache];
+      _transformIdentifier = nil;
+      _defaultImageContentMode = self.contentMode;
+      _missingImageContentMode = self.contentMode;
+      _loadedImageContentMode = self.contentMode;
     }
     return self;
 }
@@ -53,6 +49,7 @@
   if (data)
   {
     self.image = [UIImage imageWithData:data];
+    self.contentMode = _loadedImageContentMode;
     [self setNeedsDisplay];
   }
 }
@@ -60,6 +57,7 @@
 - (void) fileCache:(PLACFileCache *)cache didFailWithError:(NSError *)error
 {
   self.image = self.missingImage;
+  self.contentMode = _missingImageContentMode;
   [self setNeedsDisplay];
 }
 
@@ -67,6 +65,7 @@
 {
   if ([self.imageURL isEqualToString:url]) {
     self.image = [UIImage imageWithData:fileData];
+    self.contentMode = _loadedImageContentMode;
     [self setNeedsDisplay];
   }
 }

@@ -29,9 +29,12 @@
 
 @property (nonatomic, retain) NSString * imageURL;
 @property (nonatomic, retain) NSString * transformIdentifier;
+@property (nonatomic) UIViewContentMode loadedImageContentMode;
 
 @property (nonatomic, retain) UIImage * defaultImage;
+@property (nonatomic) UIViewContentMode defaultImageContentMode;
 @property (nonatomic, retain) UIImage * missingImage;
+@property (nonatomic) UIViewContentMode missingImageContentMode;
 
 @property (nonatomic, retain) PLACFileCache * fileCache;
 
