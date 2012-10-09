@@ -51,6 +51,8 @@
 @synthesize cacheInfoFile;
 @synthesize cacheInfo;
 @synthesize transforms;
+@synthesize failedBlock;
+@synthesize completedBlock;
 
 static PLACFileCache * sharedFileCache;
 
@@ -154,7 +156,11 @@ static PLACFileCache * sharedFileCache;
       NSData * responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
       if (error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-          [manageDelegate fileCache:self didFailWithError:error];
+            if (failedBlock) {
+                failedBlock(self,error);
+            }else{
+                [manageDelegate fileCache:self didFailWithError:error];
+            }
         });
       } else {
         NSData * (^transformBlock)(NSData *); 
@@ -163,7 +169,11 @@ static PLACFileCache * sharedFileCache;
           responseData = transformBlock(responseData);
         }
         dispatch_async(dispatch_get_main_queue(), ^{
-          [manageDelegate fileCache:self didLoadFile:responseData withTransform:transformIdentifier fromURL:url];
+            if (completedBlock) {
+                completedBlock(self,responseData,transformIdentifier,url);
+            }else{
+                [manageDelegate fileCache:self didLoadFile:responseData withTransform:transformIdentifier fromURL:url];
+            }
         });
       }
       [responseData writeToFile:[self.cacheDirectory stringByAppendingPathComponent:filename] atomically:YES];
@@ -190,7 +200,11 @@ static PLACFileCache * sharedFileCache;
   [[NSFileManager defaultManager] removeItemAtPath:self.cacheDirectory error:&error];
   
   if (error) {
-    [delegate fileCache:self didFailWithError:error];
+      if (failedBlock) {
+          failedBlock(self,error);
+      }else{
+          [delegate fileCache:self didFailWithError:error];
+      }
   }
   
   [self prepareDirectory];
@@ -207,7 +221,11 @@ static PLACFileCache * sharedFileCache;
     [[NSFileManager defaultManager] removeItemAtPath:[self.cacheDirectory stringByAppendingPathComponent:fileNameToRemove] error:nil];
     
     if (error) {
-      [delegate fileCache:self didFailWithError:error];
+        if (failedBlock) {
+            failedBlock(self,error);
+        }else{
+            [delegate fileCache:self didFailWithError:error];
+        }
     }
     
     [self.cacheInfo setValue:[NSNumber numberWithInt:[[self.cacheInfo valueForKey:@"currentSize"] intValue] - length] forKey:@"currentSize"];

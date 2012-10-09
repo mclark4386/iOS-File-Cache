@@ -40,6 +40,9 @@
 
 // Setting this to YES will disable fetching entirely.
 @property (getter=isActive) bool active;
+@property (nonatomic, copy) void(^failedBlock)(PLACFileCache*,NSError*);
+@property (nonatomic, copy) void(^completedBlock)(PLACFileCache*,NSData*,NSString*,NSString*);
+
 
 // Returns the shared cache.
 // The shared cache is simply the first initialized cache.
